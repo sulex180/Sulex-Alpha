@@ -1,30 +1,41 @@
+
 //@version=6
-indicator("Sulex Alpha", overlay=true, max_boxes_count=500, max_labels_count=500, max_lines_count=500)
+indicator("Sulex Alpha v0.2", overlay=true)
 
-//==================================================
-// SULEX ALPHA
-// Version : 0.1.0
-// Author  : Sulex180
-//==================================================
+//=========================
+// Inputs
+//=========================
+fastLength = input.int(20, "Fast EMA", minval=1)
+slowLength = input.int(50, "Slow EMA", minval=1)
 
-//========== INPUTS ==========
-emaFast = input.int(20, "Fast EMA")
-emaSlow = input.int(50, "Slow EMA")
+//=========================
+// EMA
+//=========================
+fastEMA = ta.ema(close, fastLength)
+slowEMA = ta.ema(close, slowLength)
 
-showEMA = input.bool(true, "Show EMA")
+plot(fastEMA, title="Fast EMA", color=color.green, linewidth=2)
+plot(slowEMA, title="Slow EMA", color=color.red, linewidth=2)
 
-//========== TREND ==========
-fastEMA = ta.ema(close, emaFast)
-slowEMA = ta.ema(close, emaSlow)
-
+//=========================
+// Trend
+//=========================
 bullTrend = fastEMA > slowEMA
 bearTrend = fastEMA < slowEMA
 
-plot(showEMA ? fastEMA : na, title="Fast EMA", linewidth=2)
-plot(showEMA ? slowEMA : na, title="Slow EMA", linewidth=2)
+//=========================
+// Signals
+//=========================
+buySignal = ta.crossover(fastEMA, slowEMA)
+sellSignal = ta.crossunder(fastEMA, slowEMA)
 
-bgcolor(bullTrend ? color.new(color.green,90) : bearTrend ? color.new(color.red,90) : na)
+plotshape(buySignal, title="BUY", style=shape.labelup, location=location.belowbar, color=color.green, text="BUY", textcolor=color.white)
 
-//========== ALERTS ==========
-alertcondition(bullTrend, title="Bull Trend", message="Bullish Trend Detected")
-alertcondition(bearTrend, title="Bear Trend", message="Bearish Trend Detected")
+plotshape(sellSignal, title="SELL", style=shape.labeldown, location=location.abovebar, color=color.red, text="SELL", textcolor=color.white)
+
+//=========================
+// Alerts
+//=========================
+alertcondition(buySignal, title="Buy Alert", message="Sulex Alpha BUY")
+
+alertcondition(sellSignal, title="Sell Alert", message="Sulex Alpha SELL")
